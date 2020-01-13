@@ -22,22 +22,11 @@ class BeanElemento {
 //    var quantity by quantityProperty
 }
 
-class BeanElementoModel(item: BeanElemento, val contexto: Contexto) : ItemViewModel<BeanElemento>(initialValue = item) {
+class BeanElementoModel(item: BeanElemento) : ItemViewModel<BeanElemento>(initialValue = item) {
     val texto = bind(BeanElemento::textoProperty)
     val inteiro = bind(BeanElemento::inteiroProperty)
     val real = bind(BeanElemento::realProperty)
 //    val quantity = bind(BeanElemento::quantityProperty)
-
-    init {
-        contexto.addInteiro(inteiro) {
-            intervalo(
-                minimo = -1, inclusiveMinimo = false
-            )
-        }
-        contexto.addDouble(real) {
-            positivo()
-        }
-    }
 }
 
 

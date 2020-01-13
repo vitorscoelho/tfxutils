@@ -26,8 +26,7 @@ class ViewInicial : View() {
     val real = bind(BeanElemento::realProperty)
     val quantity = bind(BeanElemento::quantityProperty)
              */
-        },
-        contexto
+        }
     )
 
 //    val context: PropertiesContext

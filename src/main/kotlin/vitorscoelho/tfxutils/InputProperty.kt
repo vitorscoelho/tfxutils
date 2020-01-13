@@ -59,24 +59,6 @@ class Contexto(val recurso: Recurso) {
         map[property.name] = dados
         return dados
     }
-    /*
-    companion object {
-        fun addValidator(
-            context: PropertiesContext,
-            textField: TextField,
-            predicate: () -> Boolean
-        ): BooleanExpression {
-            val validator = context.validationTornadoFX.addValidator(
-                node = textField,
-                property = textField.textProperty()
-            ) {
-                if (predicate.invoke()) null else error()
-            }
-            validator.validate(decorateErrors = true)
-            return validator.valid
-        }
-    }
-     */
 
     private fun setNomeDescricaoPeloRb(dadosBuilder: DadosBuilder<*>) {
         val rb = recurso.rb
