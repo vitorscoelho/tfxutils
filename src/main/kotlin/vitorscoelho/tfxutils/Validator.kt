@@ -2,6 +2,8 @@ package vitorscoelho.tfxutils
 
 import tornadofx.*
 import java.math.BigDecimal
+import java.text.NumberFormat
+import java.util.*
 
 val VALIDATE_ANYTHING: ValidationContext.(String?) -> ValidationMessage? by lazy {
     val retorno: ValidationContext.(String?) -> ValidationMessage? = { _: String? -> null }
@@ -37,11 +39,13 @@ fun ifNotIntInInterval(
     max: Int = Int.MAX_VALUE,
     minInclusive: Boolean = true,
     maxInclusive: Boolean = true,
-    severity: ValidationSeverity
+    severity: ValidationSeverity,
+    numberFormat: NumberFormat? = null
 ): ValidationContext.(String?) -> ValidationMessage? {
     val validacaoIntervalo = inteiroIntervalo(
         minimo = min, maximo = max,
-        inclusiveMinimo = minInclusive, inclusiveMaximo = maxInclusive
+        inclusiveMinimo = minInclusive, inclusiveMaximo = maxInclusive,
+        numberFormat = numberFormat
     )
     return { text: String? ->
         val textoUtilizado: String = text ?: ""
@@ -55,11 +59,13 @@ fun ifNotDoubleInInterval(
     max: Double = Double.MAX_VALUE,
     minInclusive: Boolean = true,
     maxInclusive: Boolean = true,
-    severity: ValidationSeverity
+    severity: ValidationSeverity,
+    numberFormat: NumberFormat? = null
 ): ValidationContext.(String?) -> ValidationMessage? {
     val validacaoIntervalo = doubleIntervalo(
         minimo = min, maximo = max,
-        inclusiveMinimo = minInclusive, inclusiveMaximo = maxInclusive
+        inclusiveMinimo = minInclusive, inclusiveMaximo = maxInclusive,
+        numberFormat = numberFormat
     )
     return { text: String? ->
         val textoUtilizado: String = text ?: ""
@@ -74,6 +80,16 @@ private fun Number.maiorOuIgualA(outro: Number): Boolean = (this.compare(outro) 
 private fun Number.menorQue(outro: Number): Boolean = (this.compare(outro) < 0)
 private fun Number.menorOuIgualA(outro: Number): Boolean = (this.compare(outro) <= 0)
 
+private val rb: ResourceBundle by lazy { ResourceBundle.getBundle("vitorscoelho.tfxutils.ErrorDescription") }
+private val must_be: String by lazy { rb["string_must_be"] }
+private val greater_than_or_equal_to: String by lazy { rb["string_greater_than_or_equal_to"] }
+private val greater_than: String by lazy { rb["string_greater_than"] }
+private val less_than_or_equal_to: String by lazy { rb["string_less_than_or_equal_to"] }
+private val less_than: String by lazy { rb["string_less_than"] }
+private val and: String by lazy { rb["string_and"] }
+private val integer: String by lazy { rb["string_integer"] }
+private val real: String by lazy { rb["string_real"] }
+
 private fun <T : Number> numberIntervalo(
     minimo: T,
     maximo: T,
@@ -83,26 +99,29 @@ private fun <T : Number> numberIntervalo(
     maximoPossivel: T,
     tipoNumero: String,
     isNumber: (text: String) -> Boolean,
-    toNumber: (text: String) -> T
+    toNumber: (text: String) -> T,
+    numberFormat: NumberFormat?
 ): (text: String) -> String {
     val msgErro = run {
-        val inicio = "Deve ser um $tipoNumero"
+        val stringMinimo: String = numberFormat?.format(minimo) ?: minimo.toString()
+        val stringMaximo: String = numberFormat?.format(maximo) ?: maximo.toString()
+        val inicio = "$must_be $tipoNumero"
         val msgMinimo: String = if (minimo == minimoPossivel && inclusiveMinimo) {
             ""
         } else if (inclusiveMinimo) {
-            " maior ou igual a $minimo"
+            " $greater_than_or_equal_to $stringMinimo"
         } else {
-            " maior que $minimo"
+            " $greater_than $stringMinimo"
         }
         val msgMaximo: String = if (maximo == maximoPossivel && inclusiveMaximo) {
             ""
         } else if (inclusiveMaximo) {
-            " menor ou igual a $maximo"
+            " $less_than_or_equal_to $stringMaximo"
         } else {
-            " menor que $maximo"
+            " $less_than $stringMaximo"
         }
         var msgFinal = inicio + msgMinimo
-        if (msgMinimo != "" && msgMaximo != "") msgFinal += "e "
+        if (msgMinimo != "" && msgMaximo != "") msgFinal += "$and "
         msgFinal += msgMaximo
         return@run msgFinal
     }
@@ -131,15 +150,17 @@ private fun inteiroIntervalo(
     minimo: Int = Int.MIN_VALUE,
     maximo: Int = Int.MAX_VALUE,
     inclusiveMinimo: Boolean = true,
-    inclusiveMaximo: Boolean = true
+    inclusiveMaximo: Boolean = true,
+    numberFormat: NumberFormat?
 ): (text: String) -> String {
     return numberIntervalo(
         minimo = minimo, maximo = maximo,
         inclusiveMinimo = inclusiveMinimo, inclusiveMaximo = inclusiveMaximo,
         minimoPossivel = Int.MIN_VALUE, maximoPossivel = Int.MAX_VALUE,
-        tipoNumero = "inteiro",
+        tipoNumero = integer,
         isNumber = { text -> text.isInt() },
-        toNumber = { text -> text.toInt() }
+        toNumber = { text -> text.toInt() },
+        numberFormat = numberFormat
     )
 }
 
@@ -147,14 +168,16 @@ private fun doubleIntervalo(
     minimo: Double = -Double.MAX_VALUE,
     maximo: Double = Double.MAX_VALUE,
     inclusiveMinimo: Boolean = true,
-    inclusiveMaximo: Boolean = true
+    inclusiveMaximo: Boolean = true,
+    numberFormat: NumberFormat?
 ): (text: String) -> String {
     return numberIntervalo(
         minimo = minimo, maximo = maximo,
         inclusiveMinimo = inclusiveMinimo, inclusiveMaximo = inclusiveMaximo,
         minimoPossivel = -Double.MAX_VALUE, maximoPossivel = Double.MAX_VALUE,
-        tipoNumero = "número real",
+        tipoNumero = real,
         isNumber = { text -> text.isDouble() },
-        toNumber = { text -> text.toDouble() }
+        toNumber = { text -> text.toDouble() },
+        numberFormat = numberFormat
     )
 }

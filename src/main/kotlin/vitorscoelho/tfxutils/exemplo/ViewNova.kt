@@ -30,10 +30,10 @@ internal class ViewNova : View() {
             real = 2.0
         }
     )
-    val descricoes = Descricoes(
+    val descricoes = Descriptions(
         rb = ResourceBundle.getBundle("vitorscoelho.tfxutils.Textos"),
-        sufixoNome = "nome",
-        sufixoDescricao = "descricao",
+        nameSuffix = "nome",
+        descriptionSuffix = "descricao",
         tooltipShowDelay = Duration(100.0)
     )
     override val root = form {
@@ -41,10 +41,10 @@ internal class ViewNova : View() {
             //            inputTextFieldString(property = elemento.texto, mapDadosInput = mapDadosInput) {
 //
 //            }
-            inputTextFieldInt(property = elemento.inteiro, descricoes = descricoes) {
+            inputTextFieldInt(property = elemento.inteiro, descriptions = descricoes) {
                 addValidator(validationContext, ERROR_IF_NEGATIVE_INT)
             }
-            inputTextFieldDouble(property = elemento.real, descricoes = descricoes) {
+            inputTextFieldDouble(property = elemento.real, descriptions = descricoes) {
                 addValidator(validationContext = validationContext, validator = ERROR_IF_NOT_POSITIVE_DOUBLE)
             }
         }
