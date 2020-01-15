@@ -12,7 +12,7 @@ internal fun main(args: Array<String>) {
     Application.launch(Aplicacao::class.java, *args)
 }
 
-internal class Aplicacao : App(ViewNova::class) {
+internal class Aplicacao : App(ViewNova::class, EstiloPrincipal::class) {
     init {
         reloadStylesheetsOnFocus()
         val versaoJava = System.getProperty("java.version")
@@ -22,7 +22,15 @@ internal class Aplicacao : App(ViewNova::class) {
 }
 
 internal class ViewNova : View() {
-    val validationContext = ValidationContext()
+    val validationContext = ValidationContext().apply {
+        decorationProvider = {
+            MessageDecorator(
+                message = it.message,
+                severity = it.severity,
+                tooltipCssRule = EstiloPrincipal.tooltipErro
+            )
+        }
+    }
     val elemento = BeanElementoModel(
         BeanElemento().apply {
             texto = "Texto"
