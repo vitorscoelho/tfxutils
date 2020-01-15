@@ -23,9 +23,9 @@ val STRING_CONVERTER_DOUBLE: StringConverter<Number> by lazy {
     }
 }
 
-val STRING_CONVERTER_INT: StringConverter<Int> by lazy {
-    object : StringConverter<Int>() {
-        override fun toString(valor: Int?): String? {
+val STRING_CONVERTER_INT: StringConverter<Number> by lazy {
+    object : StringConverter<Number>() {
+        override fun toString(valor: Number?): String? {
             if (valor == null) return null
             return valor.toString()
         }

@@ -3,6 +3,11 @@ package vitorscoelho.tfxutils
 import tornadofx.*
 import java.math.BigDecimal
 
+val VALIDATE_ANYTHING: ValidationContext.(String?) -> ValidationMessage? by lazy {
+    val retorno: ValidationContext.(String?) -> ValidationMessage? = { _: String? -> null }
+    retorno
+}
+
 val ERROR_IF_NOT_INT: ValidationContext.(String?) -> ValidationMessage? by lazy {
     ifNotIntInInterval(severity = ValidationSeverity.Error)
 }

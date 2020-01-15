@@ -7,11 +7,10 @@ import javafx.beans.property.SimpleStringProperty
 import tornadofx.*
 import tornadofx.getValue
 import tornadofx.setValue
-import vitorscoelho.tfxutils.Contexto
 import javax.measure.Quantity
 import javax.measure.quantity.Length
 
-class BeanElemento {
+internal class BeanElemento {
     val textoProperty = SimpleStringProperty(null, "elemento.texto")
     var texto by textoProperty
     val inteiroProperty = SimpleIntegerProperty(null, "elemento.inteiro")
@@ -22,7 +21,7 @@ class BeanElemento {
 //    var quantity by quantityProperty
 }
 
-class BeanElementoModel(item: BeanElemento) : ItemViewModel<BeanElemento>(initialValue = item) {
+internal class BeanElementoModel(item: BeanElemento) : ItemViewModel<BeanElemento>(initialValue = item) {
     val texto = bind(BeanElemento::textoProperty)
     val inteiro = bind(BeanElemento::inteiroProperty)
     val real = bind(BeanElemento::realProperty)
