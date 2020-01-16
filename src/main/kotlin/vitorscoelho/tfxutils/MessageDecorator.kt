@@ -3,21 +3,27 @@ package vitorscoelho.tfxutils
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.control.Control
-import javafx.scene.control.TextField
 import javafx.scene.control.Tooltip
 import javafx.scene.paint.Color
 import javafx.scene.shape.Polygon
-import javafx.util.Duration
 import tornadofx.*
 
-class MessageDecorator(val message: String?, severity: ValidationSeverity, val tooltipCssRule: CssRule? = null) :
+class MessageDecorator(
+    val message: String?,
+    severity: ValidationSeverity,
+    tooltipCssRule: (severity: ValidationSeverity) -> CssRule? = { null }
+) :
     Decorator {
+    constructor(message: String?, severity: ValidationSeverity, tooltipCssRule: CssRule? = null) :
+            this(message = message, severity = severity, tooltipCssRule = { tooltipCssRule })
+
     val color: Color = when (severity) {
         ValidationSeverity.Error -> Color.RED
         ValidationSeverity.Warning -> Color.ORANGE
         ValidationSeverity.Success -> Color.GREEN
         else -> Color.BLUE
     }
+    private val tooltipCssRule: CssRule? = tooltipCssRule(severity)
     var tag: Polygon? = null
     var tooltip: Tooltip? = null
     var attachedToNode: Node? = null
