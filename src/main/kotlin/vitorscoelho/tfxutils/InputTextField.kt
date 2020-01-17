@@ -4,26 +4,64 @@ import javafx.beans.DefaultProperty
 import javafx.beans.property.Property
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
+import javafx.geometry.Orientation
 import javafx.scene.Node
 import javafx.scene.control.TextField
 import javafx.scene.control.TextFormatter
 import javafx.scene.control.Tooltip
+import javafx.geometry.Orientation.HORIZONTAL
+import javafx.scene.layout.HBox
 import javafx.scene.layout.Region
+import javafx.scene.layout.VBox
 import javafx.util.StringConverter
 import tornadofx.*
 
 @DefaultProperty("inputs")
-class InputTextField(
-    private val fieldTfx: Field,
-    val textField: TextField,
-    val property: Property<*>,
-    val descriptions: Descriptions
-) : AbstractField(fieldTfx.text, fieldTfx.forceLabelIndent) {
-    override val inputContainer: Region
-        get() = fieldTfx.inputContainer
+class InputTextField<T>(
+    text: String? = null,
+    orientation: Orientation,
+    forceLabelIndent: Boolean,
+    val property: Property<T>,
+    val descriptions: Descriptions?,
+    filterInput: (formatter: TextFormatter.Change) -> Boolean,
+    converter: StringConverter<T>
+) : AbstractField(text, forceLabelIndent) {
+    override val inputContainer = if (orientation == HORIZONTAL) HBox() else VBox()
+    override val inputs: ObservableList<Node> = inputContainer.children
+    val textField = TextField()
 
-    override val inputs: ObservableList<Node>
-        get() = fieldTfx.inputs
+    init {
+        inputContainer.addClass(Stylesheet.inputContainer)
+        inputContainer.addPseudoClass(orientation.name.toLowerCase())
+        children.add(inputContainer)
+        /*
+        // Register/deregister with parent Fieldset
+        parentProperty().addListener { _, oldParent, newParent ->
+            ((oldParent as? Fieldset) ?: oldParent?.findParent<Fieldset>())?.fields?.remove(this)
+            ((newParent as? Fieldset) ?: newParent?.findParent<Fieldset>())?.fields?.add(this)
+        }
+         */
+    }
+
+    init {
+        this.text = descriptions?.name(property)
+//        with(this.label){
+//            prefWidth = Region.USE_COMPUTED_SIZE
+//            minWidth = Region.USE_PREF_SIZE
+//            maxWidth = Region.USE_PREF_SIZE
+//        }
+//        with(this.labelContainer){
+//            prefWidth = Region.USE_COMPUTED_SIZE
+//            minWidth = Region.USE_PREF_SIZE
+//            maxWidth = Region.USE_PREF_SIZE
+//        }
+        inputContainer.add(textField)
+        with(textField) {
+            filterInput(filterInput)
+            textProperty().bindBidirectional(property, converter)
+            adicionarTooltipDescricao()
+        }
+    }
 
     fun addValidator(
         validationContext: ValidationContext,
@@ -32,47 +70,57 @@ class InputTextField(
         val validator = validationContext.addValidator(node = this.textField, validator = validator)
         validator.valid.onChange { valido ->
             if (valido) {
-                this.textField.tooltip = Tooltip(this.descriptions.description(this.property))
-                this.textField.tooltip.showDelay = this.descriptions.tooltipShowDelay
+                adicionarTooltipDescricao()
             }
         }
         return validator
+    }
+
+    private fun adicionarTooltipDescricao() {
+        if (descriptions != null) {
+            textField.tooltip = Tooltip(descriptions.description(this.property)).apply {
+                showDelay = descriptions.tooltipShowDelay
+            }
+        }
     }
 }
 
 fun <T> EventTarget.inputTextField(
     property: Property<T>,
-    descriptions: Descriptions,
+    descriptions: Descriptions?,
+    orientation: Orientation,
+    forceLabelIndent: Boolean,
     filterInput: (formatter: TextFormatter.Change) -> Boolean,
     converter: StringConverter<T>,
-    op: InputTextField.(tf: TextField) -> Unit = {}
-): InputTextField {
-    var tf: TextField? = null
-
-    val fieldTfx = this.field {
-        text = descriptions.name(property)
-        tf = textfield {
-            filterInput(filterInput)
-            textProperty().bindBidirectional(property, converter)
-            tooltip = Tooltip(descriptions.description(property))
-            tooltip.showDelay = descriptions.tooltipShowDelay
-        }
-    }
-    val inputTextField = InputTextField(
-        fieldTfx = fieldTfx, textField = tf!!, property = property, descriptions = descriptions
+    op: InputTextField<T>.() -> Unit = {}
+): InputTextField<T> {
+    val descriptionsAdotado = descriptions ?: if (this is Node) this.getDescriptions() else null
+    val inputTextField = InputTextField<T>(
+        text = null,
+        orientation = orientation,
+        forceLabelIndent = forceLabelIndent,
+        property = property,
+        descriptions = descriptionsAdotado,
+        filterInput = filterInput,
+        converter = converter
     )
-    op(inputTextField, tf!!)
+    opcr(this, inputTextField) {}
+    op(inputTextField)
     return inputTextField
 }
 
 fun EventTarget.inputTextFieldInt(
     property: Property<Number>,
-    descriptions: Descriptions,
-    op: InputTextField.(tf: TextField) -> Unit = {}
-): InputTextField {
+    descriptions: Descriptions? = null,
+    orientation: Orientation = HORIZONTAL,
+    forceLabelIndent: Boolean = false,
+    op: InputTextField<Number>.() -> Unit = {}
+): InputTextField<Number> {
     return this.inputTextField(
         property = property,
         descriptions = descriptions,
+        orientation = orientation,
+        forceLabelIndent = forceLabelIndent,
         filterInput = FILTER_INPUT_INT,
         converter = STRING_CONVERTER_INT,
         op = op
@@ -81,12 +129,16 @@ fun EventTarget.inputTextFieldInt(
 
 fun EventTarget.inputTextFieldDouble(
     property: Property<Number>,
-    descriptions: Descriptions,
-    op: InputTextField.(tf: TextField) -> Unit = {}
-): InputTextField {
+    descriptions: Descriptions? = null,
+    orientation: Orientation = HORIZONTAL,
+    forceLabelIndent: Boolean = false,
+    op: InputTextField<Number>.() -> Unit = {}
+): InputTextField<Number> {
     return this.inputTextField(
         property = property,
         descriptions = descriptions,
+        orientation = orientation,
+        forceLabelIndent = forceLabelIndent,
         filterInput = FILTER_INPUT_REAL,
         converter = STRING_CONVERTER_DOUBLE,
         op = op

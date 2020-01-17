@@ -1,6 +1,7 @@
 package vitorscoelho.tfxutils.exemplo
 
 import javafx.application.Application
+import javafx.scene.Node
 import javafx.util.Duration
 import tornadofx.*
 import vitorscoelho.tfxutils.*
@@ -20,6 +21,15 @@ internal class Aplicacao : App(ViewNova::class, EstiloPrincipal::class) {
         println("Versão Java: $versaoJava // Versão JavaFX: $versaoJavaFX")
     }
 }
+
+/*
+class ScopeInicialVisualizador(val enderecoBancoDeDados: String) : Scope() {
+    val dao = DAO(enderecoBD = enderecoBancoDeDados)
+}
+
+internal class ControllerInicialVisualizador : Controller() {
+    override val scope = super.scope as ScopeInicialVisualizador
+ */
 
 internal class ViewNova : View() {
     val validationContext = ValidationContext().apply {
@@ -44,17 +54,18 @@ internal class ViewNova : View() {
         descriptionSuffix = "descricao",
         tooltipShowDelay = Duration(100.0)
     )
-    override val root = form {
+    override val root = formWithDescriptions(descriptions = descricoes) {
         fieldset("Dados de elemento") {
             //            inputTextFieldString(property = elemento.texto, mapDadosInput = mapDadosInput) {
 //
 //            }
-            inputTextFieldInt(property = elemento.inteiro, descriptions = descricoes) {
+            inputTextFieldInt(property = elemento.inteiro) {
                 addValidator(validationContext, ERROR_IF_NEGATIVE_INT)
             }
-            inputTextFieldDouble(property = elemento.real, descriptions = descricoes) {
+            inputTextFieldDouble(property = elemento.real) {
                 addValidator(validationContext = validationContext, validator = ERROR_IF_NOT_POSITIVE_DOUBLE)
             }
+            field("OIsss")
         }
     }
 }

@@ -23,6 +23,27 @@ internal class EstiloPrincipal : Stylesheet() {
         val larguraFieldset = 180.px
         val larguraBotaoETextArea = larguraFieldset * 2.0
         val spacingVBox = 20.px
+//        form {
+//            fontSize = fontSizePadrao
+//            legend {
+//                fontSize = fontSizePadrao * 1.2
+//            }
+//            hbox {
+//                spacing = 20.px
+//            }
+//            field {
+////                setMinMaxPrefWidth(larguraFieldset)
+//                label{
+//                    prefWidth = 300.px
+//                    maxWidth = 300.px
+//                }
+//                textField {
+//                    prefWidth = 300.px
+//                    maxWidth = 300.px
+//                    alignment = Pos.CENTER_RIGHT
+//                }
+//            }
+//        }
         vboxDados {
             fontSize = fontSizePadrao
             alignment = Pos.TOP_CENTER
